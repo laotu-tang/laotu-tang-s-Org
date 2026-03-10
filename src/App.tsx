@@ -32,10 +32,10 @@ export default function App() {
   const [isCalling, setIsCalling] = useState(false);
   const [isSimulating, setIsSimulating] = useState(false);
   
-  // Production Readiness Settings
-  const [aiProvider, setAiProvider] = useState<"gemini" | "deepseek">("gemini");
+  // 境内落地配置
+  const [aiProvider, setAiProvider] = useState<"gemini" | "deepseek">("deepseek");
   const [apiProxy, setApiProxy] = useState("");
-  const [systemInstruction, setSystemInstruction] = useState("You are a helpful AI phone assistant. Be concise, professional, and friendly. If you don't know something, ask for clarification.");
+  const [systemInstruction, setSystemInstruction] = useState("你是一个专业的中文电话助理。说话简短、礼貌，像真人一样交流。如果遇到不确定的事情，请询问对方。");
   const [usageStats, setUsageStats] = useState({ totalMinutes: 0, totalCalls: 0 });
   
   const serverWsRef = useRef<WebSocket | null>(null);
@@ -286,8 +286,8 @@ export default function App() {
             <Phone size={24} />
           </div>
           <div>
-            <h1 className="text-xl font-semibold tracking-tight">AI Phone Assistant</h1>
-            <p className="text-xs text-black/40 uppercase tracking-widest font-medium">Smart Receptionist</p>
+            <h1 className="text-xl font-semibold tracking-tight">AI 电话助手</h1>
+            <p className="text-xs text-black/40 uppercase tracking-widest font-medium">智能接听与拨打</p>
           </div>
         </div>
         
@@ -307,21 +307,21 @@ export default function App() {
             className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${activeTab === "history" ? 'bg-white shadow-sm font-medium' : 'hover:bg-black/5 text-black/60'}`}
           >
             <History size={20} />
-            Call History
+            通话历史
           </button>
           <button 
             onClick={() => setActiveTab("simulator")}
             className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${activeTab === "simulator" ? 'bg-white shadow-sm font-medium' : 'hover:bg-black/5 text-black/60'}`}
           >
             <MessageSquare size={20} />
-            Virtual Simulator
+            虚拟模拟器
           </button>
           <button 
             onClick={() => setActiveTab("settings")}
             className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${activeTab === "settings" ? 'bg-white shadow-sm font-medium' : 'hover:bg-black/5 text-black/60'}`}
           >
             <Settings size={20} />
-            Configuration
+            系统配置
           </button>
         </div>
 
@@ -333,7 +333,7 @@ export default function App() {
               <div className="bg-white p-4 rounded-2xl shadow-sm border border-black/5 flex gap-3">
                 <input 
                   type="text" 
-                  placeholder="Enter phone number to call..." 
+                  placeholder="输入要拨打的电话号码..." 
                   value={outboundNumber}
                   onChange={(e) => setOutboundNumber(e.target.value)}
                   className="flex-1 px-4 py-2 bg-black/5 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
@@ -344,7 +344,7 @@ export default function App() {
                   className="px-6 py-2 bg-emerald-500 text-white rounded-xl text-sm font-medium hover:bg-emerald-600 transition-all disabled:opacity-50 flex items-center gap-2"
                 >
                   {isCalling ? <Loader2 size={16} className="animate-spin" /> : <Phone size={16} />}
-                  Make Call
+                  发起通话
                 </button>
               </div>
 
@@ -372,8 +372,8 @@ export default function App() {
 
               <div className="bg-white rounded-3xl shadow-sm overflow-hidden border border-black/5">
                 <div className="px-6 py-4 border-b border-black/5 bg-black/[0.02] flex justify-between items-center">
-                  <h2 className="font-semibold">Recent Calls</h2>
-                  <span className="text-xs font-medium text-black/40 uppercase tracking-wider">{calls.length} Total</span>
+                  <h2 className="font-semibold">最近通话</h2>
+                  <span className="text-xs font-medium text-black/40 uppercase tracking-wider">共 {calls.length} 条记录</span>
                 </div>
                 
                 <div className="divide-y divide-black/5">
@@ -425,12 +425,12 @@ export default function App() {
                   {isSimulating ? <PhoneOff size={40} /> : <PhoneIncoming size={40} />}
                 </div>
                 <h2 className="text-2xl font-bold mb-2">
-                  {isSimulating ? "Simulated Call in Progress" : "Virtual Call Simulator"}
+                  {isSimulating ? "模拟通话进行中" : "虚拟通话模拟器"}
                 </h2>
                 <p className="text-black/40 mb-8">
                   {isSimulating 
-                    ? "The AI is listening to your microphone. Speak now to test the response." 
-                    : "Test the AI's voice and logic using your computer's microphone and speakers without a phone line."}
+                    ? "AI 正在倾听您的麦克风。请开始说话以测试响应。" 
+                    : "无需电话线路，使用您的麦克风和扬声器测试 AI 的语音和逻辑。"}
                 </p>
                 
                 <button 
@@ -440,12 +440,12 @@ export default function App() {
                   {isSimulating ? (
                     <>
                       <PhoneOff size={24} />
-                      End Simulation
+                      结束模拟
                     </>
                   ) : (
                     <>
                       <PhoneIncoming size={24} />
-                      Start Simulated Call
+                      开始模拟通话
                     </>
                   )}
                 </button>
@@ -468,82 +468,76 @@ export default function App() {
             <div className="bg-white p-8 rounded-3xl shadow-sm border border-black/5 space-y-8">
               <div className="flex justify-between items-start">
                 <div>
-                  <h2 className="text-xl font-semibold mb-2">System Configuration</h2>
-                  <p className="text-sm text-black/40">Manage your AI engines and telephony providers.</p>
+                  <h2 className="text-xl font-semibold mb-2">系统配置</h2>
+                  <p className="text-sm text-black/40">管理您的 AI 引擎和电话服务提供商。</p>
                 </div>
                 <div className="bg-emerald-50 px-4 py-2 rounded-xl border border-emerald-100">
-                  <span className="text-xs font-bold text-emerald-700 uppercase">Personal Plan</span>
+                  <span className="text-xs font-bold text-emerald-700 uppercase">个人版 (境内落地)</span>
                 </div>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 {/* AI Engine Settings */}
                 <div className="space-y-4">
-                  <h3 className="text-sm font-bold uppercase tracking-widest text-black/30">AI Engine</h3>
+                  <h3 className="text-sm font-bold uppercase tracking-widest text-black/30">AI 引擎</h3>
                   <div className="space-y-4">
                     <div className="space-y-2">
-                      <label className="text-xs font-medium">System Instruction (AI Personality)</label>
+                      <label className="text-xs font-medium">系统指令 (AI 人设)</label>
                       <textarea 
                         value={systemInstruction}
                         onChange={(e) => setSystemInstruction(e.target.value)}
-                        placeholder="e.g. You are a secretary for a law firm..."
+                        placeholder="例如：你是一个律师事务所的秘书..."
                         className="w-full px-4 py-3 bg-black/5 border border-black/5 rounded-xl text-sm h-24 resize-none focus:ring-2 focus:ring-emerald-500/20 outline-none"
                       />
                     </div>
                     <div className="space-y-2">
-                      <label className="text-xs font-medium">Provider</label>
+                      <label className="text-xs font-medium">模型提供商</label>
                       <select 
                         value={aiProvider}
                         onChange={(e) => setAiProvider(e.target.value as any)}
                         className="w-full px-4 py-3 bg-black/5 border border-black/5 rounded-xl text-sm focus:ring-2 focus:ring-emerald-500/20 outline-none"
                       >
-                        <option value="gemini">Google Gemini 2.5 (Best for Voice)</option>
-                        <option value="deepseek">DeepSeek V3 (Most Cost Effective)</option>
+                        <option value="deepseek">DeepSeek V3 (国内首选，极低成本)</option>
+                        <option value="gemini">Google Gemini 2.5 (海外首选，实时语音)</option>
                       </select>
                     </div>
                     <div className="space-y-2">
-                      <label className="text-xs font-medium">API Proxy URL (Optional for China)</label>
+                      <label className="text-xs font-medium">API 代理地址 (境内部署必填)</label>
                       <input 
                         type="text" 
-                        placeholder="https://your-proxy.com/v1" 
+                        placeholder="https://api.deepseek.com" 
                         value={apiProxy}
                         onChange={(e) => setApiProxy(e.target.value)}
                         className="w-full px-4 py-3 bg-black/5 border border-black/5 rounded-xl text-sm"
                       />
-                      <p className="text-[10px] text-black/30 italic">Required if deploying on servers within mainland China.</p>
                     </div>
                   </div>
                 </div>
 
                 {/* Twilio Settings */}
                 <div className="space-y-4">
-                  <h3 className="text-sm font-bold uppercase tracking-widest text-black/30">Telephony (Twilio)</h3>
+                  <h3 className="text-sm font-bold uppercase tracking-widest text-black/30">电话线路 (Twilio/声网)</h3>
                   <div className="space-y-4">
                     <div className="space-y-2">
-                      <label className="text-xs font-medium">Account SID</label>
+                      <label className="text-xs font-medium">账户 SID</label>
                       <input type="password" value="••••••••••••••••" disabled className="w-full px-4 py-3 bg-black/5 border border-black/5 rounded-xl text-sm opacity-60" />
                     </div>
                     <div className="space-y-2">
-                      <label className="text-xs font-medium">Twilio Phone Number</label>
-                      <input type="text" placeholder="+1234567890" className="w-full px-4 py-3 bg-black/5 border border-black/5 rounded-xl text-sm" />
+                      <label className="text-xs font-medium">绑定电话号码</label>
+                      <input type="text" placeholder="+86..." className="w-full px-4 py-3 bg-black/5 border border-black/5 rounded-xl text-sm" />
                     </div>
                   </div>
                 </div>
               </div>
 
-              {/* Cost & Usage */}
-              <div className="bg-black/5 p-6 rounded-2xl grid grid-cols-3 gap-4">
-                <div className="text-center">
-                  <div className="text-2xl font-bold">{usageStats.totalCalls}</div>
-                  <div className="text-[10px] uppercase text-black/40 font-bold">Total Calls</div>
-                </div>
-                <div className="text-center border-x border-black/10">
-                  <div className="text-2xl font-bold">{usageStats.totalMinutes}m</div>
-                  <div className="text-[10px] uppercase text-black/40 font-bold">Duration</div>
-                </div>
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-emerald-600">~$0.00</div>
-                  <div className="text-[10px] uppercase text-black/40 font-bold">Est. Cost</div>
+              {/* China Landing Guide */}
+              <div className="bg-blue-50 p-6 rounded-2xl border border-blue-100 space-y-4">
+                <h3 className="text-sm font-bold text-blue-800 uppercase tracking-widest">中国境内落地指南 (China Landing Guide)</h3>
+                <div className="text-xs text-blue-700 space-y-2 leading-relaxed">
+                  <p>1. <strong>模型选择</strong>：建议首选 <strong>DeepSeek V3</strong>。它在国内访问极其稳定，且 API 成本仅为海外模型的 1/10。</p>
+                  <p>2. <strong>语音方案</strong>：境内通话建议集成 <strong>MiniMax</strong> 或 <strong>火山引擎</strong> 的实时语音流 API，以获得最低延迟。</p>
+                  <p>3. <strong>线路合规</strong>：Twilio 号码拨打国内手机号易被拦截。落地建议使用 <strong>声网 (Agora)</strong> 的 PSTN 落地服务，或申请国内正规的 SIP 线路。</p>
+                  <p>4. <strong>服务器</strong>：务必部署在阿里云/腾讯云的 <strong>境内节点</strong>（如上海、北京），以确保语音传输的实时性。</p>
                 </div>
               </div>
 

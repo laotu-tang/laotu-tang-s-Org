@@ -27,6 +27,36 @@ db.exec(`
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+app.post("/api/chat/deepseek", async (req, res) => {
+  const { message, systemInstruction } = req.body;
+  const apiKey = process.env.DEEPSEEK_API_KEY;
+
+  if (!apiKey) {
+    return res.status(500).json({ error: "DEEPSEEK_API_KEY not configured" });
+  }
+
+  try {
+    const response = await fetch("https://api.deepseek.com/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${apiKey}`
+      },
+      body: JSON.stringify({
+        model: "deepseek-chat",
+        messages: [
+          { role: "system", content: systemInstruction },
+          { role: "user", content: message }
+        ]
+      })
+    });
+    const data = await response.json();
+    res.json(data);
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // Twilio Webhook for incoming calls
 app.post("/api/voice", (req, res) => {
   const twiml = new twilio.twiml.VoiceResponse();
