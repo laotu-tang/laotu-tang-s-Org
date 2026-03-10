@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { GoogleGenAI, Modality, LiveServerMessage } from "@google/genai";
-import { Phone, PhoneIncoming, PhoneOff, History, MessageSquare, Settings, CheckCircle, XCircle, Loader2 } from "lucide-react";
+import { Phone, PhoneIncoming, PhoneOff, History, MessageSquare, Settings, CheckCircle, XCircle, Loader2, Zap, Mic2 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 
 interface Call {
@@ -35,7 +35,7 @@ export default function App() {
   // 境内落地配置
   const [aiProvider, setAiProvider] = useState<"gemini" | "deepseek">("deepseek");
   const [apiProxy, setApiProxy] = useState("");
-  const [systemInstruction, setSystemInstruction] = useState("你是一个专业的中文电话助理。说话简短、礼貌，像真人一样交流。如果遇到不确定的事情，请询问对方。");
+  const [systemInstruction, setSystemInstruction] = useState("你是一个专业的中文电话助理。说话要自然、简短、有礼貌，像真人一样交流。使用口语化的表达，避免机械感。如果对方是推销，请客气地拒绝；如果是重要事情，请记录并告知我会转达。");
   const [usageStats, setUsageStats] = useState({ totalMinutes: 0, totalCalls: 0 });
   
   const serverWsRef = useRef<WebSocket | null>(null);
@@ -554,14 +554,13 @@ export default function App() {
                 </div>
               </div>
 
-              {/* China Landing Guide */}
-              <div className="bg-blue-50 p-6 rounded-2xl border border-blue-100 space-y-4">
-                <h3 className="text-sm font-bold text-blue-800 uppercase tracking-widest">中国境内落地指南 (China Landing Guide)</h3>
-                <div className="text-xs text-blue-700 space-y-2 leading-relaxed">
-                  <p>1. <strong>模型选择</strong>：建议首选 <strong>DeepSeek V3</strong>。它在国内访问极其稳定，且 API 成本仅为海外模型的 1/10。</p>
-                  <p>2. <strong>语音方案</strong>：境内通话建议集成 <strong>MiniMax</strong> 或 <strong>火山引擎</strong> 的实时语音流 API，以获得最低延迟。</p>
-                  <p>3. <strong>线路合规</strong>：Twilio 号码拨打国内手机号易被拦截。落地建议使用 <strong>声网 (Agora)</strong> 的 PSTN 落地服务，或申请国内正规的 SIP 线路。</p>
-                  <p>4. <strong>服务器</strong>：务必部署在阿里云/腾讯云的 <strong>境内节点</strong>（如上海、北京），以确保语音传输的实时性。</p>
+              {/* 风险与注意事项 */}
+              <div className="bg-amber-50 p-6 rounded-2xl border border-amber-100 space-y-4">
+                <h3 className="text-sm font-bold text-amber-800 uppercase tracking-widest">落地风险与注意事项 (Risks & Issues)</h3>
+                <div className="text-xs text-amber-700 space-y-2 leading-relaxed">
+                  <p>1. <strong>线路拦截</strong>：国内运营商对 VoIP (网络电话) 审查极严。使用 Twilio 等海外号码拨打国内手机极易被标记为骚扰电话或直接拦截。建议使用国内合规的 <strong>PSTN 落地线路</strong>。</p>
+                  <p>2. <strong>延迟问题</strong>：语音通话对延迟极其敏感。如果服务器部署在海外，AI 响应会有 2-3 秒的明显停顿，导致对话不自然。必须确保 <strong>服务器、AI 模型、语音合成</strong> 都在境内或有极速专线连接。</p>
+                  <p>3. <strong>合规性</strong>：在中国境内运营此类业务需注意电信业务经营许可 (ICP/EDI) 以及数据安全合规要求。</p>
                 </div>
               </div>
 
