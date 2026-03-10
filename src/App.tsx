@@ -52,7 +52,7 @@ export default function App() {
     const ws = new WebSocket(`${protocol}//${window.location.host}/api/frontend`);
     serverWsRef.current = ws;
 
-    ws.onopen = () => setStatus("Connected to Server");
+    ws.onopen = () => setStatus("已连接服务器");
     ws.onmessage = async (event) => {
       const data = JSON.parse(event.data);
       
@@ -64,7 +64,7 @@ export default function App() {
         setIsLive(false);
         setActiveCall(null);
         if (geminiSessionRef.current) {
-          const transcript = "Real call transcript...";
+          const transcript = "通话转录内容...";
           summarizeCall(data.callSid, transcript);
         }
       } else if (data.event === "audio_in" && geminiSessionRef.current) {
@@ -112,7 +112,7 @@ export default function App() {
 
   const startGeminiSession = async (callSid: string, isLocal: boolean = false) => {
     try {
-      setStatus("Initializing AI...");
+      setStatus("正在初始化 AI...");
       const apiKey = process.env.API_KEY || process.env.GEMINI_API_KEY;
       
       // If using DeepSeek or Proxy, the logic would change here. 
@@ -129,11 +129,11 @@ export default function App() {
           speechConfig: {
             voiceConfig: { prebuiltVoiceConfig: { voiceName: "Zephyr" } },
           },
-          systemInstruction: `${systemInstruction}\n\n${isLocal ? "This is a SIMULATED test call using the user's local microphone." : `Current Call ID: ${callSid}`}`,
+          systemInstruction: `${systemInstruction}\n\n${isLocal ? "这是一次模拟测试通话，使用的是本地麦克风。" : `当前通话 ID: ${callSid}`}`,
         },
         callbacks: {
           onopen: () => {
-            setStatus("AI Ready & Listening");
+            setStatus("AI 已就绪，正在倾听");
             if (isLocal) setupLocalAudio();
           },
           onmessage: async (message: LiveServerMessage) => {
@@ -359,16 +359,40 @@ export default function App() {
                       <PhoneIncoming className="animate-bounce" />
                     </div>
                     <div>
-                      <h3 className="font-semibold">Active Call Ongoing</h3>
-                      <p className="text-sm text-black/40">AI is currently handling the conversation...</p>
+                      <h3 className="font-semibold">正在通话中</h3>
+                      <p className="text-sm text-black/40">AI 正在处理对话...</p>
                     </div>
                   </div>
                   <div className="flex items-center gap-3">
                     <Loader2 className="animate-spin text-emerald-500" size={20} />
-                    <span className="text-sm font-medium text-emerald-600">Live Transcription</span>
+                    <span className="text-sm font-medium text-emerald-600">实时转录中</span>
                   </div>
                 </motion.div>
               )}
+
+              {/* 工作原理说明 */}
+              <div className="bg-white p-8 rounded-3xl shadow-sm border border-black/5 space-y-6">
+                <h2 className="text-xl font-bold flex items-center gap-2">
+                  <Zap className="text-amber-500" /> 它是如何工作的？
+                </h2>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  <div className="space-y-2">
+                    <div className="w-8 h-8 bg-black text-white rounded-full flex items-center justify-center font-bold text-sm">1</div>
+                    <h3 className="font-bold text-sm">绑定号码</h3>
+                    <p className="text-xs text-black/50 leading-relaxed">在运营商后台购买一个虚拟号码，并将 Webhook 链接指向本服务器。</p>
+                  </div>
+                  <div className="space-y-2">
+                    <div className="w-8 h-8 bg-black text-white rounded-full flex items-center justify-center font-bold text-sm">2</div>
+                    <h3 className="font-bold text-sm">自动接听</h3>
+                    <p className="text-xs text-black/50 leading-relaxed">当有人拨打该号码时，服务器会 24/7 自动接听，无需人工干预。</p>
+                  </div>
+                  <div className="space-y-2">
+                    <div className="w-8 h-8 bg-black text-white rounded-full flex items-center justify-center font-bold text-sm">3</div>
+                    <h3 className="font-bold text-sm">AI 对话与总结</h3>
+                    <p className="text-xs text-black/50 leading-relaxed">AI 根据你设置的“人设”与对方交流，通话结束后自动生成摘要发送给你。</p>
+                  </div>
+                </div>
+              </div>
 
               <div className="bg-white rounded-3xl shadow-sm overflow-hidden border border-black/5">
                 <div className="px-6 py-4 border-b border-black/5 bg-black/[0.02] flex justify-between items-center">
@@ -380,7 +404,7 @@ export default function App() {
                   {calls.length === 0 ? (
                     <div className="p-12 text-center text-black/40">
                       <MessageSquare size={48} className="mx-auto mb-4 opacity-20" />
-                      <p>No calls recorded yet.</p>
+                      <p>暂无通话记录。</p>
                     </div>
                   ) : (
                     calls.map((call) => (
@@ -401,7 +425,7 @@ export default function App() {
                             </div>
                           </div>
                           <div className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${call.status === 'ongoing' ? 'bg-emerald-100 text-emerald-700' : 'bg-black/5 text-black/40'}`}>
-                            {call.status}
+                            {call.status === 'ongoing' ? '通话中' : '已完成'}
                           </div>
                         </div>
                         
