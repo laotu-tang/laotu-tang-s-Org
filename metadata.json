@@ -1,0 +1,5 @@
+{
+  "name": "AI Phone Assistant",
+  "description": "A smart AI receptionist that can receive and make phone calls, converse using Gemini Live, and provide call summaries.",
+  "requestFramePermissions": ["microphone"]
+}
