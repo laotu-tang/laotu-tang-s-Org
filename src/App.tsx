@@ -32,6 +32,12 @@ export default function App() {
   const [isCalling, setIsCalling] = useState(false);
   const [isSimulating, setIsSimulating] = useState(false);
   
+  // Production Readiness Settings
+  const [aiProvider, setAiProvider] = useState<"gemini" | "deepseek">("gemini");
+  const [apiProxy, setApiProxy] = useState("");
+  const [systemInstruction, setSystemInstruction] = useState("You are a helpful AI phone assistant. Be concise, professional, and friendly. If you don't know something, ask for clarification.");
+  const [usageStats, setUsageStats] = useState({ totalMinutes: 0, totalCalls: 0 });
+  
   const serverWsRef = useRef<WebSocket | null>(null);
   const geminiSessionRef = useRef<any>(null);
   const audioContextRef = useRef<AudioContext | null>(null);
@@ -108,7 +114,13 @@ export default function App() {
     try {
       setStatus("Initializing AI...");
       const apiKey = process.env.API_KEY || process.env.GEMINI_API_KEY;
-      const ai = new GoogleGenAI({ apiKey });
+      
+      // If using DeepSeek or Proxy, the logic would change here. 
+      // For now, we keep Gemini as default but structure for expansion.
+      const ai = new GoogleGenAI({ 
+        apiKey,
+        // In a real marketized app, you'd pass the proxy URL to the SDK if supported
+      });
       
       const sessionPromise = ai.live.connect({
         model: "gemini-2.5-flash-native-audio-preview-09-2025",
@@ -117,9 +129,7 @@ export default function App() {
           speechConfig: {
             voiceConfig: { prebuiltVoiceConfig: { voiceName: "Zephyr" } },
           },
-          systemInstruction: `You are a professional AI receptionist. 
-          Your goal is to answer calls politely and help the caller. 
-          ${isLocal ? "This is a SIMULATED test call using the user's local microphone." : `Current Call ID: ${callSid}`}`,
+          systemInstruction: `${systemInstruction}\n\n${isLocal ? "This is a SIMULATED test call using the user's local microphone." : `Current Call ID: ${callSid}`}`,
         },
         callbacks: {
           onopen: () => {
@@ -456,37 +466,84 @@ export default function App() {
             </div>
           ) : (
             <div className="bg-white p-8 rounded-3xl shadow-sm border border-black/5 space-y-8">
-              <div>
-                <h2 className="text-xl font-semibold mb-2">Twilio Configuration</h2>
-                <p className="text-sm text-black/40">Set up your Twilio credentials to enable phone connectivity.</p>
+              <div className="flex justify-between items-start">
+                <div>
+                  <h2 className="text-xl font-semibold mb-2">System Configuration</h2>
+                  <p className="text-sm text-black/40">Manage your AI engines and telephony providers.</p>
+                </div>
+                <div className="bg-emerald-50 px-4 py-2 rounded-xl border border-emerald-100">
+                  <span className="text-xs font-bold text-emerald-700 uppercase">Personal Plan</span>
+                </div>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-2">
-                  <label className="text-xs font-bold uppercase tracking-wider text-black/40">Account SID</label>
-                  <input 
-                    type="password" 
-                    value="••••••••••••••••" 
-                    disabled 
-                    className="w-full px-4 py-3 bg-black/5 border border-black/5 rounded-xl text-sm"
-                  />
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                {/* AI Engine Settings */}
+                <div className="space-y-4">
+                  <h3 className="text-sm font-bold uppercase tracking-widest text-black/30">AI Engine</h3>
+                  <div className="space-y-4">
+                    <div className="space-y-2">
+                      <label className="text-xs font-medium">System Instruction (AI Personality)</label>
+                      <textarea 
+                        value={systemInstruction}
+                        onChange={(e) => setSystemInstruction(e.target.value)}
+                        placeholder="e.g. You are a secretary for a law firm..."
+                        className="w-full px-4 py-3 bg-black/5 border border-black/5 rounded-xl text-sm h-24 resize-none focus:ring-2 focus:ring-emerald-500/20 outline-none"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-xs font-medium">Provider</label>
+                      <select 
+                        value={aiProvider}
+                        onChange={(e) => setAiProvider(e.target.value as any)}
+                        className="w-full px-4 py-3 bg-black/5 border border-black/5 rounded-xl text-sm focus:ring-2 focus:ring-emerald-500/20 outline-none"
+                      >
+                        <option value="gemini">Google Gemini 2.5 (Best for Voice)</option>
+                        <option value="deepseek">DeepSeek V3 (Most Cost Effective)</option>
+                      </select>
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-xs font-medium">API Proxy URL (Optional for China)</label>
+                      <input 
+                        type="text" 
+                        placeholder="https://your-proxy.com/v1" 
+                        value={apiProxy}
+                        onChange={(e) => setApiProxy(e.target.value)}
+                        className="w-full px-4 py-3 bg-black/5 border border-black/5 rounded-xl text-sm"
+                      />
+                      <p className="text-[10px] text-black/30 italic">Required if deploying on servers within mainland China.</p>
+                    </div>
+                  </div>
                 </div>
-                <div className="space-y-2">
-                  <label className="text-xs font-bold uppercase tracking-wider text-black/40">Auth Token</label>
-                  <input 
-                    type="password" 
-                    value="••••••••••••••••" 
-                    disabled 
-                    className="w-full px-4 py-3 bg-black/5 border border-black/5 rounded-xl text-sm"
-                  />
+
+                {/* Twilio Settings */}
+                <div className="space-y-4">
+                  <h3 className="text-sm font-bold uppercase tracking-widest text-black/30">Telephony (Twilio)</h3>
+                  <div className="space-y-4">
+                    <div className="space-y-2">
+                      <label className="text-xs font-medium">Account SID</label>
+                      <input type="password" value="••••••••••••••••" disabled className="w-full px-4 py-3 bg-black/5 border border-black/5 rounded-xl text-sm opacity-60" />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-xs font-medium">Twilio Phone Number</label>
+                      <input type="text" placeholder="+1234567890" className="w-full px-4 py-3 bg-black/5 border border-black/5 rounded-xl text-sm" />
+                    </div>
+                  </div>
                 </div>
-                <div className="space-y-2 md:col-span-2">
-                  <label className="text-xs font-bold uppercase tracking-wider text-black/40">Twilio Phone Number</label>
-                  <input 
-                    type="text" 
-                    placeholder="+1234567890" 
-                    className="w-full px-4 py-3 bg-black/5 border border-black/5 rounded-xl text-sm"
-                  />
+              </div>
+
+              {/* Cost & Usage */}
+              <div className="bg-black/5 p-6 rounded-2xl grid grid-cols-3 gap-4">
+                <div className="text-center">
+                  <div className="text-2xl font-bold">{usageStats.totalCalls}</div>
+                  <div className="text-[10px] uppercase text-black/40 font-bold">Total Calls</div>
+                </div>
+                <div className="text-center border-x border-black/10">
+                  <div className="text-2xl font-bold">{usageStats.totalMinutes}m</div>
+                  <div className="text-[10px] uppercase text-black/40 font-bold">Duration</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-emerald-600">~$0.00</div>
+                  <div className="text-[10px] uppercase text-black/40 font-bold">Est. Cost</div>
                 </div>
               </div>
 
