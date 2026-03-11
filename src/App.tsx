@@ -26,7 +26,7 @@ export default function App() {
   const [calls, setCalls] = useState<Call[]>([]);
   const [activeCall, setActiveCall] = useState<string | null>(null);
   const [isLive, setIsLive] = useState(false);
-  const [status, setStatus] = useState("Idle");
+  const [status, setStatus] = useState("空闲");
   const [activeTab, setActiveTab] = useState<"history" | "settings" | "simulator">("history");
   const [outboundNumber, setOutboundNumber] = useState("");
   const [isCalling, setIsCalling] = useState(false);
@@ -100,7 +100,7 @@ export default function App() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          summary: "The caller inquired about business hours and left a message for the manager.",
+          summary: "通话摘要：来电者询问了营业时间，并给经理留了言。",
           transcript: transcript
         })
       });
@@ -129,7 +129,7 @@ export default function App() {
           speechConfig: {
             voiceConfig: { prebuiltVoiceConfig: { voiceName: "Zephyr" } },
           },
-          systemInstruction: `${systemInstruction}\n\n${isLocal ? "这是一次模拟测试通话，使用的是本地麦克风。" : `当前通话 ID: ${callSid}`}`,
+          systemInstruction: `${systemInstruction}\n\n请始终使用中文回复。${isLocal ? "这是一次模拟测试通话，使用的是本地麦克风。" : `当前通话 ID: ${callSid}`}`,
         },
         callbacks: {
           onopen: () => {
@@ -150,12 +150,12 @@ export default function App() {
             }
           },
           onclose: () => {
-            setStatus("AI Session Closed");
+            setStatus("AI 会话已关闭");
             if (isLocal) stopSimulator();
           },
           onerror: (err) => {
             console.error("Gemini Error:", err);
-            setStatus("AI Error");
+            setStatus("AI 发生错误");
           }
         }
       });
@@ -163,7 +163,7 @@ export default function App() {
       geminiSessionRef.current = sessionPromise;
     } catch (err) {
       console.error("Failed to start Gemini session", err);
-      setStatus("AI Failed to Start");
+      setStatus("AI 启动失败");
     }
   };
 
@@ -199,7 +199,7 @@ export default function App() {
       processor.connect(audioContextRef.current.destination);
     } catch (err) {
       console.error("Mic access denied", err);
-      setStatus("Mic Error");
+      setStatus("麦克风错误");
     }
   };
 
@@ -254,9 +254,9 @@ export default function App() {
       audioContextRef.current.suspend();
     }
     if (geminiSessionRef.current) {
-      summarizeCall("sim-" + Date.now(), "Simulated test conversation...");
+      summarizeCall("sim-" + Date.now(), "模拟测试通话内容...");
     }
-    setStatus("Simulator Stopped");
+    setStatus("模拟器已停止");
   };
 
   const makeCall = async () => {
@@ -269,7 +269,7 @@ export default function App() {
         body: JSON.stringify({ phoneNumber: outboundNumber })
       });
       const data = await res.json();
-      if (!data.success) alert(`Failed to call: ${data.error}`);
+      if (!data.success) alert(`拨打失败: ${data.error}`);
     } catch (err) {
       console.error("Call error", err);
     } finally {
@@ -556,7 +556,7 @@ export default function App() {
 
               {/* 风险与注意事项 */}
               <div className="bg-amber-50 p-6 rounded-2xl border border-amber-100 space-y-4">
-                <h3 className="text-sm font-bold text-amber-800 uppercase tracking-widest">落地风险与注意事项 (Risks & Issues)</h3>
+                <h3 className="text-sm font-bold text-amber-800 uppercase tracking-widest">落地风险与注意事项</h3>
                 <div className="text-xs text-amber-700 space-y-2 leading-relaxed">
                   <p>1. <strong>线路拦截</strong>：国内运营商对 VoIP (网络电话) 审查极严。使用 Twilio 等海外号码拨打国内手机极易被标记为骚扰电话或直接拦截。建议使用国内合规的 <strong>PSTN 落地线路</strong>。</p>
                   <p>2. <strong>延迟问题</strong>：语音通话对延迟极其敏感。如果服务器部署在海外，AI 响应会有 2-3 秒的明显停顿，导致对话不自然。必须确保 <strong>服务器、AI 模型、语音合成</strong> 都在境内或有极速专线连接。</p>
@@ -567,19 +567,19 @@ export default function App() {
               <div className="bg-emerald-50 p-6 rounded-2xl border border-emerald-100">
                 <h3 className="text-emerald-800 font-semibold mb-2 flex items-center gap-2">
                   <CheckCircle size={18} />
-                  Webhook Setup
+                  Webhook 设置
                 </h3>
                 <p className="text-sm text-emerald-700/80 mb-4">
-                  Copy this URL to your Twilio Phone Number's "A CALL COMES IN" webhook setting:
+                  请将此 URL 复制到您的 Twilio 电话号码的 "A CALL COMES IN" Webhook 设置中：
                 </p>
                 <code className="block w-full p-3 bg-white/50 rounded-lg text-xs font-mono break-all border border-emerald-200">
                   {window.location.origin}/api/voice
                 </code>
               </div>
 
-              <div className="pt-4 border-top border-black/5 flex justify-end">
+              <div className="pt-4 border-t border-black/5 flex justify-end">
                 <button className="px-8 py-3 bg-black text-white rounded-xl font-medium hover:bg-black/80 transition-all">
-                  Save Configuration
+                  保存配置
                 </button>
               </div>
             </div>
